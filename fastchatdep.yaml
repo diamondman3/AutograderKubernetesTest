@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastchatdep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: fastchatdep
+  template:
+    metadata:
+      labels:
+        k8s-app: fastchatdep
+    spec:
+      containers:
+      - name: fastchatdep
+        image: gitlab-registry.nrp-nautilus.io/prp/jupyter-stack/prp:latest
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        command: ["sh","-c","pip3 install fschat[model_worker] && pip3 install protobuf==3.20.* && pip3 install protobuf==3.19.* && python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5 && sleep infinity"]
+        volumeMounts:
+        - name: fastchatmnt
+          mountPath: /fastchatpvc
+        resources:
+          limits:
+            memory: 64Gi
+            cpu: "8"
+            nvidia.com/gpu: "1"
+          requests:
+            memory: 64Gi
+            cpu: "8"
+            nvidia.com/gpu: "1"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nvidia.com/gpu.product
+                operator: In
+                values:
+                - NVIDIA-A10
+                - NVIDIA-RTX-3090
+                - NVIDIA-RTX-4090
+                - NVIDIA-RTX-A6000
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/gilpin-lab
+        operator: Exists
+      volumes:
+      - name: fastchatmnt
+        persistentVolumeClaim:
+          claimName: raja-volume
