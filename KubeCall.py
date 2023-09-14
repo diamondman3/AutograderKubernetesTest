@@ -36,7 +36,7 @@ def runTest(existingDep):
             time.sleep(10) #Takes a real long time to download fastchat
             print (".", end = "")
 #    os.system("kubectl exec -it " + podName + " -- python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5 & pwd") #<<The second command is confirmed to run on the Windows system
-    os.system("kubectl exec -it " + podName + " -- python3 RunFastchat.py")
+    os.system("kubectl exec -it " + podName + " -- python3 AutograderKubernetesTest/RunFastchat.py")
 
     #Execute Fastchat prompt
     prompt = "Among us"
