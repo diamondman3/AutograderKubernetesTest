@@ -31,9 +31,12 @@ def runTest(existingDep):
     podName = strPodCheck[podNameIndex:podNameIndex+podNameLength]
 
     if not existingDep:
-        time.sleep(30) #Takes a real long time to download fastchat
-    os.system("kubectl exec -it " + podName + " -- python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5")
-    #Runs out of memory when executed.
+        print("Loading", end = "")
+        for i in range(1, 6):
+            time.sleep(10) #Takes a real long time to download fastchat
+            print (".", end = "")
+#    os.system("kubectl exec -it " + podName + " -- python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5 & pwd") #<<The second command is confirmed to run on the Windows system
+    os.system("kubectl exec -it " + podName + " -- python3 RunFastchat.py")
 
     #Execute Fastchat prompt
     prompt = "Among us"
