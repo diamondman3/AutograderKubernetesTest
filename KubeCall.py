@@ -1,6 +1,14 @@
 #Use py -3.10 KubeCall.py to run
 #I might need to make that time.sleep even longer, but for now, just run this on an existing deployment
 
+"""
+llm shell commands through kubectl notes
+
+Attempting to use "llm chat" from another computer crashes the llm program
+Attempting to use llm -m [MODEL] prompt with an invalid model causes an error, but does stop the program
+
+"""
+
 import os, sys
 import importlib.util
 import http.client
@@ -11,7 +19,9 @@ from kubernetes import client, config
 def runTest(existingDep):
     #Create deployment
     if not existingDep:
-        subprocess.run(["kubectl", "apply", "-f", "fastchatdep.yaml"])
+        subprocess.run(["kubectl", "apply", "-f", "llmdep.yaml"])
+
+#        subprocess.run(["kubectl", "apply", "-f", "fastchatdep.yaml"])
 
     #Wait for pod to be ready
     podReady = False
@@ -25,22 +35,29 @@ def runTest(existingDep):
     print(strPodCheck)
 
     #Enter pod and start fastchat
-    podNameIndex = strPodCheck.index("fastchatdep-")
-    #It's always 27 characters, fastchatdep-9 numbers-5 alphanumeric
-    podNameLength = 27
+    print(strPodCheck)
+    podNameIndex = strPodCheck.index("llmdep-")
+    #It's always 23 characters, llmdep-9 numbers-5 alphanumeric
+    podNameLength = 23
     podName = strPodCheck[podNameIndex:podNameIndex+podNameLength]
 
     if not existingDep:
         print("Loading", end = "")
-        for i in range(1, 6):
-            time.sleep(10) #Takes a real long time to download fastchat
+        for i in range(1, 10):
+            time.sleep(60) #Takes like 10 minutes to start up
             print (".", end = "")
-#    os.system("kubectl exec -it " + podName + " -- python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5 & pwd") #<<The second command is confirmed to run on the Windows system
-    os.system("kubectl exec -it " + podName + " -- python3 AutograderKubernetesTest/RunFastchat.py")
 
     #Execute Fastchat prompt
     prompt = "Among us"
-    #print(subprocess.check_output(prompt))
+    os.system("kubectl exec -i " + podName + " -- python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5")
+#    os.system("kubectl exec -i " + podName + " -- llm install llm-gpt4all") #-i means only use standard input, -t means actually accesing the pod. IT'S THAT EASY.
+    
+    print("Attempting to pass in prompt...")
+    
+    os.system(prompt)
+    
+#    os.system("kubectl exec -i " + podName + " -- llm \"" + prompt + "\" -m wizardLM-13B-Uncensored")
+
 
 
     #End program
@@ -48,7 +65,7 @@ def runTest(existingDep):
     #os.system("exit")
     #Above line does not activate on server.
     if not existingDep:
-        os.system("kubectl delete deployments fastchatdep")
+        os.system("kubectl delete deployments llmdep")
         
 
 #Actually run from command line
