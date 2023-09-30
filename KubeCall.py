@@ -6,6 +6,7 @@ llm shell commands through kubectl notes
 
 Attempting to use "llm chat" from another computer crashes the llm program
 Attempting to use llm -m [MODEL] prompt with an invalid model causes an error, but does stop the program
+Can't do cd through -i without -it
 
 """
 
@@ -49,14 +50,12 @@ def runTest(existingDep):
 
     #Execute Fastchat prompt
     prompt = "Among us"
-    os.system("kubectl exec -i " + podName + " -- python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5")
-#    os.system("kubectl exec -i " + podName + " -- llm install llm-gpt4all") #-i means only use standard input, -t means actually accesing the pod. IT'S THAT EASY.
+#    os.system("kubectl exec -i " + podName + " -- python3 -m fastchat.serve.cli --model-path lmsys/vicuna-7b-v1.5")
+    os.system("kubectl exec -i " + podName + " -- llm install llm-gpt4all") #-i means only use standard input, -t means actually accesing the pod. IT'S THAT EASY.
     
     print("Attempting to pass in prompt...")
-    
-    os.system(prompt)
-    
-#    os.system("kubectl exec -i " + podName + " -- llm \"" + prompt + "\" -m wizardLM-13B-Uncensored")
+
+    os.system("kubectl exec -i " + podName + " -- llm -m orca-mini-3b \"test\"") #These commands work fine outside python, hangs here
 
 
 
